@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeypot API Endpoint Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --border-color: #2a2a4a;
+            --text-primary: #e8e8f0;
+            --text-secondary: #9090a8;
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card h2 i {
+            color: var(--accent-light);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Test Results */
+        .results {
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+        }
+
+        .test-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .test-icon.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .test-icon.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .test-icon.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .test-icon.pending {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--accent-light);
+        }
+
+        .test-content {
+            flex: 1;
+        }
+
+        .test-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .test-message {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .response-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-box.success {
+            border-color: var(--success);
+        }
+
+        .response-box.error {
+            border-color: var(--error);
+        }
+
+        /* Summary */
+        .summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-item {
+            flex: 1;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .summary-item.passed .summary-value {
+            color: var(--success);
+        }
+
+        .summary-item.failed .summary-value {
+            color: var(--error);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .info-box i {
+            color: var(--accent-light);
+            font-size: 1.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-action {
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-action:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-action i {
+            font-size: 1.5rem;
+            color: var(--accent-light);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .quick-action span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-flask"></i> Honeypot API Tester</h1>
+            <p class="subtitle">Validate your endpoint before GUVI evaluation</p>
+        </header>
+
+        <div class="card">
+            <h2><i class="fas fa-cog"></i> Configuration</h2>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <p><strong>What this tests:</strong> API authentication, endpoint availability, response structure,
+                        status codes, and basic honeypot behavior.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="endpoint">API Endpoint URL</label>
+                <input type="url" id="endpoint" placeholder="https://your-deployed-url.com"
+                    value="http://localhost:8000">
+            </div>
+
+            <div class="form-group">
+                <label for="apiKey">API Key (x-api-key header)</label>
+                <input type="text" id="apiKey" placeholder="your-api-key" value="">
+            </div>
+
+            <div class="quick-actions">
+                <div class="quick-action" onclick="loadLocalConfig()">
+                    <i class="fas fa-home"></i>
+                    <span>Use Local (.env)</span>
+                </div>
+                <div class="quick-action" onclick="testAuth()">
+                    <i class="fas fa-key"></i>
+                    <span>Test Auth Only</span>
+                </div>
+                <div class="quick-action" onclick="viewDocs()">
+                    <i class="fas fa-book"></i>
+                    <span>API Docs</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="testMessage">Test Message (Scam Simulation)</label>
+                <textarea id="testMessage">{
+    "sessionId": "test-session-001",
+    "message": {
+        "sender": "scammer",
+        "text": "URGENT: Your bank account has been blocked! Send your UPI ID kumar@upi and OTP immediately to unblock. Call 9876543210 now!",
+        "timestamp": 1707151607
+    },
+    "conversationHistory": [],
+    "metadata": {
+        "channel": "SMS"
+    }
+}</textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="runTestsBtn" onclick="runAllTests()">
+                    <i class="fas fa-play"></i>
+                    Run All Tests
+                </button>
+                <button class="btn btn-secondary" onclick="clearResults()">
+                    <i class="fas fa-trash"></i>
+                    Clear Results
+                </button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="card">
+                <h2><i class="fas fa-chart-bar"></i> Test Results</h2>
+
+                <div class="summary">
+                    <div class="summary-item passed">
+                        <div class="summary-value" id="passedCount">0</div>
+                        <div class="summary-label">Passed</div>
+                    </div>
+                    <div class="summary-item failed">
+                        <div class="summary-value" id="failedCount">0</div>
+                        <div class="summary-label">Failed</div>
+                    </div>
+                </div>
+
+                <div id="testResults"></div>
+
+                <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">
+                    <i class="fas fa-terminal" style="color: var(--accent-light);"></i>
+                    Response Details
+                </h3>
+                <div class="response-box" id="responseDetails">
+                    Test not run yet...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        // Load local config from .env
+        async function loadLocalConfig() {
+            document.getElementById('endpoint').value = 'http://localhost:8000';
+            // Try to get the API key from the local server
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                if (response.ok) {
+                    alert('Connected to local server! Enter your API key from .env file.');
+                }
+            } catch (e) {
+                alert('Local server might not be running. Start it with: uvicorn main:app --reload');
+            }
+        }
+
+        // Test authentication only
+        async function testAuth() {
+            const endpoint = document.getElementById('endpoint').value;
+            const apiKey = document.getElementById('apiKey').value;
+
+            if (!apiKey) {
+                alert('Please enter an API key');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: JSON.stringify({
+                        sessionId: 'auth-test',
+                        message: { sender: 'test', text: 'hello', timestamp: Date.now() },
+                        conversationHistory: []
+                    })
+                });
+
+                if (response.status === 403) {
+                    alert('❌ Authentication FAILED - Invalid API key');
+                } else if (response.status === 200) {
+                    alert('✅ Authentication SUCCESS - API key is valid!');
+                } else {
+                    alert(`⚠️ Unexpected status: ${response.status}`);
+                }
+            } catch (e) {
+                alert('❌ Connection failed: ' + e.message);
+            }
+        }
+
+        // View API docs
+        function viewDocs() {
+            const endpoint = document.getElementById('endpoint').value;
+            window.open(`${endpoint}/docs`, '_blank');
+        }
+
+        // Add test result
+        function addTestResult(name, success, message) {
+            testResults.push({ name, success, message });
+            renderResults();
+        }
+
+        // Render all results
+        function renderResults() {
+            const container = document.getElementById('testResults');
+            const passed = testResults.filter(t => t.success).length;
+            const failed = testResults.filter(t => !t.success).length;
+
+            document.getElementById('passedCount').textContent = passed;
+            document.getElementById('failedCount').textContent = failed;
+
+            container.innerHTML = testResults.map(test => `
+                <div class="test-item">
+                    <div class="test-icon ${test.success ? 'success' : 'error'}">
+                        <i class="fas ${test.success ? 'fa-check' : 'fa-times'}"></i>
+                    </div>
+                    <div class="test-content">
+                        <div class="test-name">${test.name}</div>
+                        <div class="test-message">${test.message}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Clear results
+        function clearResults() {
+            testResults = [];
+            document.getElementById('results').classList.remove('visible');
+            document.getElementById('responseDetails').textContent = 'Test not run yet...';
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            const endpoint = document.getElementById('endpoint').value.replace(/\/$/, '');
+            const apiKey = document.getElementById('apiKey').value;
+            const testMessage = document.getElementById('testMessage').value;
+
+            if (!endpoint) {
+                alert('Please enter an endpoint URL');
+                return;
+            }
+
+            if (!apiKey) {
+                alert('Please enter an API key');
+                return;
+            }
+
+            // Reset
+            testResults = [];
+            document.getElementById('results').classList.add('visible');
+            document.getElementById('responseDetails').textContent = 'Running tests...';
+
+            const btn = document.getElementById('runTestsBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner loading"></i> Testing...';
+
+            let responseDetails = [];
+
+            // Test 1: Root endpoint
+            try {
+                const res = await fetch(`${endpoint}/`);
+                const data = await res.json();
+                addTestResult('Root Endpoint (/)', res.ok, `Status: ${res.status} - ${JSON.stringify(data)}`);
+                responseDetails.push(`GET /\nStatus: ${res.status}\n${JSON.stringify(data, null, 2)}`);
+            } catch (e) {
+                addTestResult('Root Endpoint (/)', false, `Connection failed: ${e.message}`);
+            }
+
+            // Test 2: Auth - No API Key
+            try {
+                const res = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: testMessage
+                });
+                const success = res.status === 403 || res.status === 401;
+                addTestResult('Auth - No API Key', success,
+                    success ? 'Correctly rejected (403/401)' : `Expected 403/401, got ${res.status}`);
+                responseDetails.push(`POST /chat (no key)\nStatus: ${res.status}`);
+            } catch (e) {
+                addTestResult('Auth - No API Key', false, `Connection failed: ${e.message}`);
+            }
+
+            // Test 3: Auth - Invalid API Key
+            try {
+                const res = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': 'invalid-key-12345'
+                    },
+                    body: testMessage
+                });
+                const success = res.status === 403 || res.status === 401;
+                addTestResult('Auth - Invalid API Key', success,
+                    success ? 'Correctly rejected (403/401)' : `Expected 403/401, got ${res.status}`);
+                responseDetails.push(`POST /chat (invalid key)\nStatus: ${res.status}`);
+            } catch (e) {
+                addTestResult('Auth - Invalid API Key', false, `Connection failed: ${e.message}`);
+            }
+
+            // Test 4: Auth - Valid API Key
+            try {
+                const res = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: testMessage
+                });
+                const data = await res.json();
+                addTestResult('Auth - Valid API Key', res.status === 200,
+                    `Status: ${res.status} - ${res.status === 200 ? 'Authenticated!' : 'Failed'}`);
+                responseDetails.push(`POST /chat (valid key)\nStatus: ${res.status}\n${JSON.stringify(data, null, 2)}`);
+            } catch (e) {
+                addTestResult('Auth - Valid API Key', false, `Connection failed: ${e.message}`);
+            }
+
+            // Test 5: Response Structure
+            try {
+                const res = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: testMessage
+                });
+                const data = await res.json();
+                const hasStatus = 'status' in data;
+                const hasReply = 'reply' in data;
+                const valid = hasStatus && hasReply;
+                addTestResult('Response Structure', valid,
+                    valid ? 'Has required fields (status, reply)' : `Missing fields: ${!hasStatus ? 'status ' : ''}${!hasReply ? 'reply' : ''}`);
+            } catch (e) {
+                addTestResult('Response Structure', false, `Parse error: ${e.message}`);
+            }
+
+            // Test 6: Scam Detection (check if reply is meaningful)
+            try {
+                const res = await fetch(`${endpoint}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: testMessage
+                });
+                const data = await res.json();
+                const hasReply = data.reply && data.reply.length > 10;
+                addTestResult('Honeypot Behavior', hasReply,
+                    hasReply ? `Generated engaging reply (${data.reply.length} chars)` : 'Reply too short or empty');
+            } catch (e) {
+                addTestResult('Honeypot Behavior', false, `Error: ${e.message}`);
+            }
+
+            // Test 7: Dashboard endpoint (optional)
+            try {
+                const res = await fetch(`${endpoint}/dashboard`);
+                addTestResult('Dashboard UI', res.ok,
+                    res.ok ? 'Dashboard accessible' : `Status: ${res.status}`);
+            } catch (e) {
+                addTestResult('Dashboard UI', false, `Not available: ${e.message}`);
+            }
+
+            // Update response details
+            document.getElementById('responseDetails').textContent = responseDetails.join('\n\n' + '='.repeat(50) + '\n\n');
+            document.getElementById('responseDetails').className =
+                'response-box ' + (testResults.every(t => t.success) ? 'success' : 'error');
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Run All Tests';
+        }
+    </script>
+</body>
+
+</html>
