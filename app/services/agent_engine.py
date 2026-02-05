@@ -56,7 +56,7 @@ class AgentEngine:
 
         try:
             response = await client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 messages=messages,
                 temperature=0.7
             )

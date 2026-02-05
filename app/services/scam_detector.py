@@ -33,7 +33,7 @@ class ScamDetector:
 
         try:
             response = await client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": """You are a scam detection expert. Analyze the following message and determine if it is a scam (phishing, fraud, urgency tactics, financial request, impersonation).
                     
